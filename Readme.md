@@ -25,7 +25,7 @@ chmod +x shadowsocks-all.sh
 ./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log</code></pre>
 
 安装完成后，脚本提示如下
-Congratulations, your_shadowsocks_version install completed!
+<pre><code>Congratulations, your_shadowsocks_version install completed!
 Your Server IP        :your_server_ip
 Your Server Port      :your_server_port
 Your Password         :your_password
@@ -37,13 +37,13 @@ Your QR Code has been saved as a PNG file path:
  your_path.png
 
 Welcome to visit:https://teddysun.com/486.html
-Enjoy it!
+Enjoy it!</code></pre>
 卸载方法
 若已安装多个版本，则卸载时也需多次运行（每次卸载一种）
 
 使用root用户登录，运行以下命令：
 
-./shadowsocks-all.sh uninstall
+<pre><code>./shadowsocks-all.sh uninstall</code></pre>
 启动脚本
 启动脚本后面的参数含义，从左至右依次为：启动，停止，重启，查看状态。
 
