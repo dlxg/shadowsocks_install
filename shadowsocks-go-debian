@@ -13,7 +13,7 @@
 # Author: Teddysun <i@teddysun.com>
 
 NAME=Shadowsocks-go
-BIN=/usr/bin/shadowsocks-server
+DAEMON=/usr/bin/shadowsocks-server
 if [ -f /etc/shadowsocks-go/config.json ]; then
     CONF=/etc/shadowsocks-go/config.json
 elif [ -f /etc/shadowsocks/config.json ]; then
@@ -23,7 +23,7 @@ PID_DIR=/var/run
 PID_FILE=$PID_DIR/shadowsocks-go.pid
 RET_VAL=0
 
-[ -x $BIN ] || exit 0
+[ -x $DAEMON ] || exit 0
 
 if [ ! -d $PID_DIR ]; then
     mkdir -p $PID_DIR
@@ -70,7 +70,7 @@ do_start() {
         echo "$NAME (pid $PID) is already running..."
         return 0
     fi
-    $BIN -c $CONF 2>&1 > /dev/null &
+    $DAEMON -u -c $CONF 2>&1 > /dev/null &
     PID=$!
     echo $PID > $PID_FILE
     sleep 0.3
@@ -95,6 +95,7 @@ do_stop() {
 
 do_restart() {
     do_stop
+    sleep 0.5
     do_start
 }
 

@@ -21,6 +21,8 @@ echo
 
 libsodium_file="libsodium-1.0.16"
 libsodium_url="https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz"
+shadowsocks_r_file="shadowsocksr-3.2.2"
+shadowsocks_r_url="https://github.com/shadowsocksrr/shadowsocksr/archive/3.2.2.tar.gz"
 
 #Current folder
 cur_dir=`pwd`
@@ -38,12 +40,14 @@ aes-192-ctr
 aes-128-ctr
 chacha20-ietf
 chacha20
+salsa20
+xchacha20
+xsalsa20
 rc4-md5
-rc4-md5-6
 )
 # Reference URL:
-# https://github.com/breakwa11/shadowsocks-rss/blob/master/ssr.md
-# https://github.com/breakwa11/shadowsocks-rss/wiki/config.json
+# https://github.com/shadowsocksr-rm/shadowsocks-rss/blob/master/ssr.md
+# https://github.com/shadowsocksrr/shadowsocksr/commit/a3cf0254508992b7126ab1151df0c2f10bf82680
 # Protocol
 protocols=(
 origin
@@ -54,6 +58,10 @@ auth_aes128_md5
 auth_aes128_sha1
 auth_chain_a
 auth_chain_b
+auth_chain_c
+auth_chain_d
+auth_chain_e
+auth_chain_f
 )
 # obfs
 obfs=(
@@ -95,34 +103,34 @@ check_sys(){
     if [[ -f /etc/redhat-release ]]; then
         release="centos"
         systemPackage="yum"
-    elif cat /etc/issue | grep -Eqi "debian"; then
+    elif grep -Eqi "debian|raspbian" /etc/issue; then
         release="debian"
         systemPackage="apt"
-    elif cat /etc/issue | grep -Eqi "ubuntu"; then
+    elif grep -Eqi "ubuntu" /etc/issue; then
         release="ubuntu"
         systemPackage="apt"
-    elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
+    elif grep -Eqi "centos|red hat|redhat" /etc/issue; then
         release="centos"
         systemPackage="yum"
-    elif cat /proc/version | grep -Eqi "debian"; then
+    elif grep -Eqi "debian|raspbian" /proc/version; then
         release="debian"
         systemPackage="apt"
-    elif cat /proc/version | grep -Eqi "ubuntu"; then
+    elif grep -Eqi "ubuntu" /proc/version; then
         release="ubuntu"
         systemPackage="apt"
-    elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
+    elif grep -Eqi "centos|red hat|redhat" /proc/version; then
         release="centos"
         systemPackage="yum"
     fi
 
-    if [[ ${checkType} == "sysRelease" ]]; then
-        if [ "$value" == "$release" ]; then
+    if [[ "${checkType}" == "sysRelease" ]]; then
+        if [ "${value}" == "${release}" ]; then
             return 0
         else
             return 1
         fi
-    elif [[ ${checkType} == "packageManager" ]]; then
-        if [ "$value" == "$systemPackage" ]; then
+    elif [[ "${checkType}" == "packageManager" ]]; then
+        if [ "${value}" == "${systemPackage}" ]; then
             return 0
         else
             return 1
@@ -197,9 +205,10 @@ pre_install(){
     # Set ShadowsocksR config port
     while true
     do
-    echo -e "Please enter a port for ShadowsocksR [1-65535]:"
-    read -p "(Default port: 8989):" shadowsocksport
-    [ -z "${shadowsocksport}" ] && shadowsocksport="8989"
+    dport=$(shuf -i 9000-19999 -n 1)
+    echo -e "Please enter a port for ShadowsocksR [1-65535]"
+    read -p "(Default port: ${dport}):" shadowsocksport
+    [ -z "${shadowsocksport}" ] && shadowsocksport=${dport}
     expr ${shadowsocksport} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
         if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
@@ -319,7 +328,7 @@ download_files(){
         exit 1
     fi
     # Download ShadowsocksR file
-    if ! wget --no-check-certificate -O manyuser.zip https://github.com/teddysun/shadowsocksr/archive/manyuser.zip; then
+    if ! wget --no-check-certificate -O ${shadowsocks_r_file}.tar.gz ${shadowsocks_r_url}; then
         echo -e "[${red}Error${plain}] Failed to download ShadowsocksR file!"
         exit 1
     fi
@@ -410,8 +419,8 @@ install(){
     ldconfig
     # Install ShadowsocksR
     cd ${cur_dir}
-    unzip -q manyuser.zip
-    mv shadowsocksr-manyuser/shadowsocks /usr/local/
+    tar zxf ${shadowsocks_r_file}.tar.gz
+    mv ${shadowsocks_r_file}/shadowsocks /usr/local/
     if [ -f /usr/local/shadowsocks/server.py ]; then
         chmod +x /etc/init.d/shadowsocks
         if check_sys packageManager yum; then
@@ -445,7 +454,7 @@ install(){
 # Install cleanup
 install_cleanup(){
     cd ${cur_dir}
-    rm -rf manyuser.zip shadowsocksr-manyuser ${libsodium_file}.tar.gz ${libsodium_file}
+    rm -rf ${shadowsocks_r_file}.tar.gz ${shadowsocks_r_file} ${libsodium_file}.tar.gz ${libsodium_file}
 }
 
 

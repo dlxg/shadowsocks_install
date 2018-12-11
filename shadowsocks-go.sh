@@ -54,34 +54,34 @@ check_sys(){
     if [[ -f /etc/redhat-release ]]; then
         release="centos"
         systemPackage="yum"
-    elif cat /etc/issue | grep -Eqi "debian"; then
+    elif grep -Eqi "debian" /etc/issue; then
         release="debian"
         systemPackage="apt"
-    elif cat /etc/issue | grep -Eqi "ubuntu"; then
+    elif grep -Eqi "ubuntu" /etc/issue; then
         release="ubuntu"
         systemPackage="apt"
-    elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
+    elif grep -Eqi "centos|red hat|redhat" /etc/issue; then
         release="centos"
         systemPackage="yum"
-    elif cat /proc/version | grep -Eqi "debian"; then
+    elif grep -Eqi "debian|raspbian" /proc/version; then
         release="debian"
         systemPackage="apt"
-    elif cat /proc/version | grep -Eqi "ubuntu"; then
+    elif grep -Eqi "ubuntu" /proc/version; then
         release="ubuntu"
         systemPackage="apt"
-    elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
+    elif grep -Eqi "centos|red hat|redhat" /proc/version; then
         release="centos"
         systemPackage="yum"
     fi
 
-    if [[ ${checkType} == "sysRelease" ]]; then
-        if [ "$value" == "$release" ]; then
+    if [[ "${checkType}" == "sysRelease" ]]; then
+        if [ "${value}" == "${release}" ]; then
             return 0
         else
             return 1
         fi
-    elif [[ ${checkType} == "packageManager" ]]; then
-        if [ "$value" == "$systemPackage" ]; then
+    elif [[ "${checkType}" == "packageManager" ]]; then
+        if [ "${value}" == "${systemPackage}" ]; then
             return 0
         else
             return 1
@@ -166,9 +166,10 @@ pre_install(){
     # Set shadowsocks-go config port
     while true
     do
-    echo -e "Please enter a port for shadowsocks-go [1-65535]:"
-    read -p "(Default port: 8989):" shadowsocksport
-    [ -z "${shadowsocksport}" ] && shadowsocksport="8989"
+    dport=$(shuf -i 9000-19999 -n 1)
+    echo -e "Please enter a port for shadowsocks-go [1-65535]"
+    read -p "(Default port: ${dport}):" shadowsocksport
+    [ -z "${shadowsocksport}" ] && shadowsocksport=${dport}
     expr ${shadowsocksport} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
         if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
@@ -216,10 +217,10 @@ pre_install(){
     char=`get_char`
     #Install necessary dependencies
     if check_sys packageManager yum; then
-        yum install -y wget unzip gzip curl
+        yum install -y wget unzip gzip curl nss
     elif check_sys packageManager apt; then
         apt-get -y update
-        apt-get install -y wget unzip gzip curl
+        apt-get install -y wget unzip gzip curl libnss3
     fi
     echo
 
@@ -229,27 +230,27 @@ pre_install(){
 download_files(){
     cd ${cur_dir}
     if is_64bit; then
-        if ! wget -c http://dl.teddysun.com/shadowsocks/shadowsocks-server-linux64-1.2.1.gz; then
-            echo -e "[${red}Error${plain}] Failed to download shadowsocks-server-linux64-1.2.1.gz"
+        if ! wget --no-check-certificate -c https://dl.lamp.sh/shadowsocks/shadowsocks-server-linux64-1.2.2.gz; then
+            echo -e "[${red}Error${plain}] Failed to download shadowsocks-server-linux64-1.2.2.gz"
             exit 1
         fi
-        gzip -d shadowsocks-server-linux64-1.2.1.gz
+        gzip -d shadowsocks-server-linux64-1.2.2.gz
         if [ $? -ne 0 ]; then
-            echo -e "[${red}Error${plain}] Decompress shadowsocks-server-linux64-1.2.1.gz failed"
+            echo -e "[${red}Error${plain}] Decompress shadowsocks-server-linux64-1.2.2.gz failed"
             exit 1
         fi
-        mv -f shadowsocks-server-linux64-1.2.1 /usr/bin/shadowsocks-server
+        mv -f shadowsocks-server-linux64-1.2.2 /usr/bin/shadowsocks-server
     else
-        if ! wget -c http://dl.teddysun.com/shadowsocks/shadowsocks-server-linux32-1.2.1.gz; then
-            echo -e "[${red}Error${plain}] Failed to download shadowsocks-server-linux32-1.2.1.gz"
+        if ! wget --no-check-certificate -c https://dl.lamp.sh/shadowsocks/shadowsocks-server-linux32-1.2.2.gz; then
+            echo -e "[${red}Error${plain}] Failed to download shadowsocks-server-linux32-1.2.2.gz"
             exit 1
         fi
-        gzip -d shadowsocks-server-linux32-1.2.1.gz
+        gzip -d shadowsocks-server-linux32-1.2.2.gz
         if [ $? -ne 0 ]; then
-            echo -e "[${red}Error${plain}] Decompress shadowsocks-server-linux32-1.2.1.gz failed"
+            echo -e "[${red}Error${plain}] Decompress shadowsocks-server-linux32-1.2.2.gz failed"
             exit 1
         fi
-        mv -f shadowsocks-server-linux32-1.2.1 /usr/bin/shadowsocks-server
+        mv -f shadowsocks-server-linux32-1.2.2 /usr/bin/shadowsocks-server
     fi
 
     # Download start script
@@ -278,7 +279,7 @@ config_shadowsocks(){
     "local_port":1080,
     "password":"${shadowsockspwd}",
     "method":"${shadowsockscipher}",
-    "timeout":600
+    "timeout":300
 }
 EOF
 }

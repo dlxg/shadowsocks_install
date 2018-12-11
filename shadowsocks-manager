@@ -1,36 +1,42 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # chkconfig: 2345 90 10
 # description: A secure socks5 proxy, designed to protect your Internet traffic.
 
 ### BEGIN INIT INFO
-# Provides:          Shadowsocks-go
+# Provides:          Shadowsocks-libev
 # Required-Start:    $network $syslog
 # Required-Stop:     $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Fast tunnel proxy that helps you bypass firewalls
-# Description:       Start or stop the Shadowsocks-go server
+# Description:       Start or Stop the Shadowsocks-libev server to support multiple users with ss-manager
 ### END INIT INFO
 
 # Author: Teddysun <i@teddysun.com>
 
-# Source function library
-. /etc/rc.d/init.d/functions
-
-# Check that networking is up.
-[ ${NETWORKING} ="yes" ] || exit 0
-
-NAME=Shadowsocks-go
-DAEMON=/usr/bin/shadowsocks-server
-if [ -f /etc/shadowsocks-go/config.json ]; then
-    CONF=/etc/shadowsocks-go/config.json
-elif [ -f /etc/shadowsocks/config.json ]; then
-    CONF=/etc/shadowsocks/config.json
+if [ -f /usr/local/bin/ss-manager ]; then
+    MANAGER=/usr/local/bin/ss-manager
+elif [ -f /usr/bin/ss-manager ]; then
+    MANAGER=/usr/bin/ss-manager
 fi
+
+if [ -f /usr/local/bin/ss-server ]; then
+    DAEMON=/usr/local/bin/ss-server
+elif [ -f /usr/bin/ss-server ]; then
+    DAEMON=/usr/bin/ss-server
+fi
+
+NAME=Shadowsocks-manager
+CONF=/etc/shadowsocks-manager/config.json
 PID_DIR=/var/run
-PID_FILE=$PID_DIR/shadowsocks-go.pid
+PID_FILE=$PID_DIR/shadowsocks-manager.pid
+SOCK_FILE=$PID_DIR/shadowsocks-manager.sock
+WK_DIR=~/.shadowsocks
+WK_PID_LST=($WK_DIR/.*pid)
+
 RET_VAL=0
 
+[ -x $MANAGER ] || exit 0
 [ -x $DAEMON ] || exit 0
 
 if [ ! -d $PID_DIR ]; then
@@ -78,10 +84,7 @@ do_start() {
         echo "$NAME (pid $PID) is already running..."
         return 0
     fi
-    $DAEMON -u -c $CONF 2>&1 > /dev/null &
-    PID=$!
-    echo $PID > $PID_FILE
-    sleep 0.3
+    $MANAGER --manager-address $SOCK_FILE --executable $DAEMON -c $CONF -f $PID_FILE
     if check_running; then
         echo "Starting $NAME success"
     else
@@ -94,6 +97,12 @@ do_stop() {
     if check_running; then
         kill -9 $PID
         rm -f $PID_FILE
+        rm -f $SOCK_FILE
+        for i in "${WK_PID_LST[@]}"; do
+            [ -r $i ] && read WK_PID < $i
+            [ -d "/proc/$WK_PID" ] && kill -9 $WK_PID
+            rm -f $i
+        done
         echo "Stopping $NAME success"
     else
         echo "$NAME is stopped"
