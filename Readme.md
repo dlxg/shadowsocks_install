@@ -1,13 +1,13 @@
 ![Shadowsocks](https://github.com/teddysun/shadowsocks_install/raw/master/shadowsocks.png)
 # Auto install Shadowsocks Server
 
-默认配置
-服务器端口：自己设定（如不设定，默认从 9000-19999 之间随机生成）
-密码：自己设定（如不设定，默认为 teddysun.com）
-加密方式：自己设定（如不设定，Python 和 libev 版默认为 aes-256-gcm，R 和 Go 版默认为 aes-256-cfb）
-协议（protocol）：自己设定（如不设定，默认为 origin）（仅限 ShadowsocksR 版）
-混淆（obfs）：自己设定（如不设定，默认为 plain）（仅限 ShadowsocksR 版）
-备注：脚本默认创建单用户配置文件，如需配置多用户，请手动修改相应的配置文件后重启即可。
+默认配置<br>
+服务器端口：自己设定（如不设定，默认从 9000-19999 之间随机生成）<br>
+密码：自己设定（如不设定，默认为 teddysun.com）<br>
+加密方式：自己设定（如不设定，Python 和 libev 版默认为 aes-256-gcm，R 和 Go 版默认为 aes-256-cfb）<br>
+协议（protocol）：自己设定（如不设定，默认为 origin）（仅限 ShadowsocksR 版）<br>
+混淆（obfs）：自己设定（如不设定，默认为 plain）（仅限 ShadowsocksR 版）<br>
+备注：脚本默认创建单用户配置文件，如需配置多用户，请手动修改相应的配置文件后重启即可。<br>
 
 客户端下载
 常规版 Windows 客户端
@@ -47,27 +47,27 @@ Enjoy it!</code></pre>
 启动脚本
 启动脚本后面的参数含义，从左至右依次为：启动，停止，重启，查看状态。
 
-Shadowsocks-Python 版：
+Shadowsocks-Python 版：<br>
 /etc/init.d/shadowsocks-python start | stop | restart | status
 
-ShadowsocksR 版：
+ShadowsocksR 版：<br>
 /etc/init.d/shadowsocks-r start | stop | restart | status
 
-Shadowsocks-Go 版：
+Shadowsocks-Go 版：<br>
 /etc/init.d/shadowsocks-go start | stop | restart | status
 
-Shadowsocks-libev 版：
+Shadowsocks-libev 版：<br>
 /etc/init.d/shadowsocks-libev start | stop | restart | status
 
-各版本默认配置文件
-Shadowsocks-Python 版：
+各版本默认配置文件<br>
+Shadowsocks-Python 版：<br>
 /etc/shadowsocks-python/config.json
 
-ShadowsocksR 版：
+ShadowsocksR 版：<br>
 /etc/shadowsocks-r/config.json
 
-Shadowsocks-Go 版：
+Shadowsocks-Go 版：<br>
 /etc/shadowsocks-go/config.json
 
-Shadowsocks-libev 版：
+Shadowsocks-libev 版：<br>
 /etc/shadowsocks-libev/config.json
