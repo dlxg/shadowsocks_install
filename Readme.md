@@ -20,9 +20,10 @@ https://github.com/shadowsocksrr/shadowsocksr-csharp/releases
 
 使用root用户登录，运行以下命令：
 
-wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
+<pre><code>wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
 chmod +x shadowsocks-all.sh
-./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log
+./shadowsocks-all.sh 2>&1 | tee shadowsocks-all.log</code></pre>
+
 安装完成后，脚本提示如下
 Congratulations, your_shadowsocks_version install completed!
 Your Server IP        :your_server_ip
